@@ -23,17 +23,29 @@ def validator_moniker(validator_moniker):
     return builder.as_markup()
 
 
-def to_menu():
+def to_menu(back=False, text='', back_to=''):
     builder = InlineKeyboardBuilder()
     builder.button(text="Menu", callback_data="menu")
-    builder.adjust(1)
+    if back and text:
+        builder.button(text=text, callback_data=back_to)
+    builder.adjust(2)
     return builder.as_markup()
 
-def list_validators(validarots: list, func: str):
+
+def inline_list(validarots: list, func: str):
     builder = InlineKeyboardBuilder()
     for num in range(len(validarots)):
-        builder.add( InlineKeyboardButton(text=validarots[num], callback_data=f"{func}&{validarots[num]}") )
+        builder.add( InlineKeyboardButton(text=validarots[num].title(), callback_data=f"{func}&{validarots[num]}") )
     builder.adjust(4)
     builder.row(InlineKeyboardButton(text="Menu", callback_data="menu"))
     
+    return builder.as_markup()
+
+def list_validators_back(validarots: list, func: str, back: str, last_choice='' ):
+    builder = InlineKeyboardBuilder()
+    for num in range(len(validarots)):
+        builder.add( InlineKeyboardButton(text=validarots[num].title(), callback_data=f"{func}&{validarots[num]}") )
+    builder.adjust(4)
+    builder.row(InlineKeyboardButton(text="Menu", callback_data="menu"), InlineKeyboardButton(text="Back", callback_data=f'{back}{last_choice}'))
+
     return builder.as_markup()

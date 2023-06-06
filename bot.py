@@ -12,6 +12,7 @@ from tgbot.handlers.manage_checkers import checker_router
 from tgbot.handlers.user import user_router
 from tgbot.middlewares.config import ConfigMiddleware
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage, DefaultKeyBuilder, StorageKey
+
 from schedulers.job_new import check_user_node
 from tgbot.services import broadcaster
 
@@ -48,6 +49,21 @@ async def main():
     bot = Bot(token=config.tg_bot.token, parse_mode='HTML')
 
     dp = Dispatcher(storage=storage)
+
+    storage = dp.storage
+    
+
+    # redis_url = await storage.update_data(bot, data="Mavron")
+    # logging.info(f"DISPECHER: {storage}")
+    # if isinstance(storage, RedisStorage):
+    #     # Отримання URL Redis з об'єкта RedisStorage
+
+    #     # Розбиваємо URL Redis для отримання номера бази даних
+    #     db_index = int(redis_url.split('/')[-1])
+    #     print(f"Dispatcher підключений до бази даних з індексом: {db_index}")
+    # else:
+    #     print("Dispatcher не підключений до RedisStorage")
+    # time.sleep(100)
     scheduler = setup_scheduler(bot = bot, config = config, storage = storage)
     
     for router in [
@@ -65,11 +81,11 @@ async def main():
     
     await on_startup(bot, config.tg_bot.admin_ids)
     
-    for type_network in config_toml.keys():
-        for network in config_toml[type_network].keys():
+    for type_network in config_toml["networks"].keys():
+        for network in config_toml["networks"][type_network].keys():
                 scheduler.add_job(
                         check_user_node,
-                        IntervalTrigger(minutes=config_toml[type_network][network]["time_repeat"]),
+                        IntervalTrigger(minutes=config_toml["networks"][type_network][network]["time_repeat"]),
                         kwargs={
                             'storage': storage,
                             'type_network': type_network,

@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from aiogram import Bot
 
 from tgbot.config import Config
+from tgbot.config import load_config
+
 
 
 def get_already_db() -> list[int]:
@@ -22,6 +24,7 @@ def get_already_db() -> list[int]:
     return databases
     
 def get_db():
+    config = load_config(".env")
     config_toml = toml.load("config.toml")
     databases_already = get_already_db()
     for key in config_toml.keys():
@@ -35,7 +38,7 @@ def get_db():
                 j+=1
                 continue
 
-            if i in databases_already:
+            if i in databases_already or i == config.redis_config.db:
                 i+=1
                 continue
             
@@ -50,14 +53,14 @@ def get_db():
     
 
 
-def get_keys_redis(config: Config, db: int ) -> list:
+def get_keys_redis(config: Config ) -> list:
     
     keys = []
     
     r = redis.Redis(
         host=config.redis_config.host, 
         port=config.redis_config.port, 
-        db=db,
+        db=config.redis_config.db,
         password=config.redis_config.password
         )
 

@@ -23,15 +23,15 @@ async def check_user_node(
         network: str
         ) -> None:
     
-    get_db()
+    # get_db()
 
     config_toml = toml.load("config.toml")
     
 
    
-    time_repeat = config_toml[type_network][network]["time_repeat"]
-    allow_missed_block = config_toml[type_network][network]["missed_blocks"]
-    urls = await check_url(config_toml[type_network][network]["rpc"])
+    time_repeat = config_toml["networks"][type_network][network]["time_repeat"]
+    allow_missed_block = config_toml["networks"][type_network][network]["missed_blocks"]
+    urls = await check_url(config_toml["networks"][type_network][network]["rpc"])
 
     logging.info(f"type_network: {type_network} | network: {network}")
     if urls["active_urls"] == []:
@@ -47,7 +47,7 @@ async def check_user_node(
 
     url = urls["active_urls"][0]
 
-    keys = get_keys_redis(config, config_toml[type_network][network]["db"])
+    keys = get_keys_redis(config)
 
 
     for key in keys:
@@ -60,27 +60,27 @@ async def check_user_node(
         logging.info(f"User: id - {user_id}")
 
         data = await storage.get_data(bot, StorageKey(bot_id=bot_id, chat_id=chat_id, user_id=user_id))
-        list_users = list(data["validators"].keys())
+        list_users = list(data["validators"][type_network][network].keys())
         logging.info(f"Users: {len(list_users)}")
 
 
-        for moniker in data["validators"].keys():
+        for moniker in data["validators"][type_network][network].keys():
             logging.info(f"Moniker: {moniker}")
 
             # validators = await get_validators(url)
             # validator = validators[await get_index_by_moniker(moniker, validators)]
             # signing_info = await slashing_signing_info(validator.get("consensus_pubkey").get("key"), url)
-            signing_infos = await slashing_signing_info_all(url)
-            signing_info = signing_infos[await get_index_by_consAddr(data["validators"][moniker]["const_addr"], signing_infos)]
+            signing_infos = await slashing_signing_info_all(url, config_toml["networks"][type_network][network]["path_bin"])
+            signing_info = signing_infos[await get_index_by_consAddr(data["validators"][type_network][network][moniker]["const_addr"], signing_infos)]
 
-            first_snapshot_missed_block = data["validators"][moniker]["last_missed_block"]
+            first_snapshot_missed_block = data["validators"][type_network][network][moniker]["last_missed_block"]
             second_snapshot_missed_block = int(signing_info.get("missed_blocks_counter"))
 
             if check_number_missed_blocks(first_snapshot_missed_block, second_snapshot_missed_block, allow_missed_block):
 
                 await send_message_user(bot=bot, chat_id=chat_id, moniker=moniker, missed_blocks=second_snapshot_missed_block)
 
-            data["validators"][moniker]["last_missed_block"] = second_snapshot_missed_block
+            data["validators"][type_network][network][moniker]["last_missed_block"] = second_snapshot_missed_block
 
         
 

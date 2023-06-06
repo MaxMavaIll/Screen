@@ -25,8 +25,8 @@ class Miscellaneous:
 class RedisConfig:
     host: str
     port: int
-    db: int
     password: str
+    db: int
 
     def dsn(self):
         return f"redis://:{self.password}@{self.host}:{self.port}/{self.db}"

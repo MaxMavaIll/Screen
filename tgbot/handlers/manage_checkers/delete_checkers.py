@@ -11,7 +11,7 @@ from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 # from api.requests import MintScanner
 from tgbot.handlers.manage_checkers.router import checker_router
 from tgbot.misc.states import DeleteChecker
-from tgbot.keyboards.inline import menu, to_menu, list_validators
+from tgbot.keyboards.inline import menu, to_menu, inline_list
 
 def num_data(data, keys_data):
     new_data = dict()

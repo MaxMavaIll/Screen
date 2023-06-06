@@ -19,7 +19,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from tgbot.handlers.manage_checkers.router import checker_router
 from tgbot.misc.states import Status
 from tgbot.keyboards.inline import validator_moniker
-from tgbot.keyboards.inline import menu, list_validators, to_menu
+from tgbot.keyboards.inline import menu, inline_list, to_menu
 
 import os
 from funtion import *
