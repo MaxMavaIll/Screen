@@ -39,10 +39,19 @@ async def user_start(message: Message, state: FSMContext, bot: Bot):
     
     data['message_id'] = msg.message_id
 
+    data['type_network'] = ""
+    data['network'] = ""
     await state.update_data(data)
     await state.set_state(None)
     
 
 @user_router.callback_query(text="menu")
-async def Menu(callback: CallbackQuery):
+async def Menu(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    data['type_network'] = ""
+    data['network'] = ""
+    
     await callback.message.edit_text("<b>Menu</b>", reply_markup=menu())
+    
+    await state.update_data(data)
+    await state.set_state(None)

@@ -1,24 +1,76 @@
 import toml, logging
 
-
-from aiogram.dispatcher.filters import Command
+from aiogram import Bot
+from aiogram.dispatcher.filters import Command, Text
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
 from tgbot.handlers.manage_checkers.router import checker_router
-from tgbot.keyboards.inline import menu, to_menu
+from tgbot.keyboards.inline import *
 
 @checker_router.callback_query(text="list")
+async def create_checker(callback: CallbackQuery, state: FSMContext):
+    """Entry point for create checker conversation"""
+    data = await state.get_data()
+    type_networks = list(data["validators"].keys())
+
+    if type_networks != []:
+        await callback.message.edit_text("Please select a network",
+                                         reply_markup=inline_list(type_networks, 'type_networkL'))
+
+    else:
+        await callback.message.edit_text(f"<b>There are currently no Networks available</b>",
+                                         reply_markup=to_menu())
+
+@checker_router.callback_query(Text(text_startswith="type_networkL&"))
+async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
+
+    # config = toml.load("config.toml")
+    type_network = callback.data.split("&")[-1].lower()
+    data = await state.get_data()
+
+    if type_network == 'back':
+        type_network = data["type_network"]
+    else:
+        await state.update_data(type_network=type_network)
+#    logging.info(f'Chains {chains.keys()} {n}')
+
+    networks = list(data["validators"][type_network].keys())
+    
+    if networks != {}:
+        await bot.edit_message_text("Please select a network",
+                                    chat_id=callback.from_user.id,
+                                    message_id=data['message_id'],
+                                    reply_markup=validator_moniker(
+                                        list(networks), 'networkL', 'list')
+                                    # reply_markup=list_validators(list(chains[network].keys()), 'chain'))
+                                    )
+    else:
+        await callback.answer(
+            'Sorry, but I didn\'t find any checker. \n'
+            'First, create a checker',
+            # show_alert=True
+        )
+
+        # data['type_network'] = ""
+        # data['network'] = ""
+        return
+
+
+
+@checker_router.callback_query(Text(text_startswith="networkL&"))
 async def list_my_validators(callback: CallbackQuery, state: FSMContext):
     """List all registered validators"""
 
-    config = toml.load("config.toml")
+    # config = toml.load("config.toml")
     logging.info(f"I display the list on the screen {callback.from_user.id}")
 
     data = await state.get_data()
     validators = data.get('validators')
-    validators_list = list(validators.keys())
-    network = config["network"]
+    type_network = data["type_network"]
+    network = callback.data.split("&")[-1].lower()
+
+    logging.info(f"Data: {data}")
 
     if not validators:
         await callback.answer(
@@ -31,12 +83,12 @@ async def list_my_validators(callback: CallbackQuery, state: FSMContext):
 
     validators_str = 'I\'m checking the following validators:\n\n'
     validators_str = validators_str + '\n'.join([
-        f'{num}. {network} {validator}\n'
-        for num, validator in enumerate(validators.keys(), 1)
+        f'{num}. {validator}\n'
+        for num, validator in enumerate(list(validators[type_network][network].keys()), 1)
     ]
     )
     await callback.message.edit_text(validators_str,
-                                        reply_markup=to_menu())
+                                        reply_markup=to_menu(True, "Try another platform", "type_networkL&back"))
     
     logging.info(f"I displayed the list on the screen {callback.from_user.id}: success ✅\n")
 

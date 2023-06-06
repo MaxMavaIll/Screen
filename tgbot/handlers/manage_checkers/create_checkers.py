@@ -53,7 +53,7 @@ async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
         await bot.edit_message_text("Please select a network",
                                     chat_id=callback.from_user.id,
                                     message_id=data['message_id'],
-                                    reply_markup=list_validators_back(
+                                    reply_markup=list_back(
                                         list(config["networks"][type_network].keys()), 'network', 'create')
                                     # reply_markup=list_validators(list(chains[network].keys()), 'chain'))
                                     )
@@ -64,8 +64,6 @@ async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
             # show_alert=True
         )
 
-        data['type_network'] = ""
-        data['network'] = ""
         return
 
 
@@ -75,6 +73,7 @@ async def create_checker(callback: CallbackQuery, state: FSMContext):
     config = toml.load("config.toml")
     data = await state.get_data()
     network = callback.data.split("&")[-1].lower()
+
     if network == 'back':
         network = data["network"]
     else:
@@ -207,8 +206,6 @@ async def enter_operator_address(message: Message, state: FSMContext,
 
         # await storage.redis.set('checkers', json.dumps(checkers))
 
-    data['type_network'] = ""
-    data['network'] = ""
 
     await state.update_data(data)
     await state.set_state(None)

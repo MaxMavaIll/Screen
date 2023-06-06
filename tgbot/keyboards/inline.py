@@ -14,11 +14,12 @@ def menu():
 
     return builder.as_markup()
 
-def validator_moniker(validator_moniker):
-
+def validator_moniker(validarots: list, func: str, back: str, last_choice='' ):
     builder = InlineKeyboardBuilder()
-    for num in len(validator_moniker) :
-        builder.add( text=validator_moniker[num], callback_data=num )
+    for num in range(len(validarots)):
+        builder.add( InlineKeyboardButton(text=validarots[num], callback_data=f"{func}&{validarots[num]}") )
+    builder.adjust(4)
+    builder.row(InlineKeyboardButton(text="Menu", callback_data="menu"), InlineKeyboardButton(text="Back", callback_data=f'{back}{last_choice}'))
 
     return builder.as_markup()
 
@@ -41,7 +42,7 @@ def inline_list(validarots: list, func: str):
     
     return builder.as_markup()
 
-def list_validators_back(validarots: list, func: str, back: str, last_choice='' ):
+def list_back(validarots: list, func: str, back: str, last_choice='' ):
     builder = InlineKeyboardBuilder()
     for num in range(len(validarots)):
         builder.add( InlineKeyboardButton(text=validarots[num].title(), callback_data=f"{func}&{validarots[num]}") )
