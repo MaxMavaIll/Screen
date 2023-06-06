@@ -10,22 +10,32 @@ path_bin = "/home/ubuntu/go/bin/cyber"
 time_repeat = 1
 missed_blocks = 90
 
-# [networks.mainnet.stride]
-# network = "bostrom"
-# min_signed_per_window = 75
-# signed_blocks_window = 8000
-# time_create_block = 5.5
-# rpc = [ "http://176.36.248.34:26657",]
-# path_bin = "/home/ubuntu/go/bin/cyber"
-# time_repeat = 2
-# missed_blocks = 90
+[networks.mainnet.stride]
+network = "bostrom"
+min_signed_per_window = 75
+signed_blocks_window = 8000
+time_create_block = 5.5
+rpc = [ "https://rpc.bostrom.cybernode.ai:443",]
+path_bin = "/home/ubuntu/go/bin/cyber"
+time_repeat = 10
+missed_blocks = 90
 
-# [networks.mainnet.mork]
-# network = "bostrom"
-# min_signed_per_window = 75
-# signed_blocks_window = 8000
-# time_create_block = 5.5
-# rpc = [ "http://176.36.248.34:26657",]
-# path_bin = "/home/ubuntu/go/bin/cyber"
-# time_repeat = 3
-# missed_blocks = 90
+[networks.mainnet.mork]
+network = "bostrom"
+min_signed_per_window = 75
+signed_blocks_window = 8000
+time_create_block = 5.5
+rpc = [ "https://rpc.bostrom.cybernode.ai:443",]
+path_bin = "/home/ubuntu/go/bin/cyber"
+time_repeat = 10
+missed_blocks = 90
+
+[networks.testnet.bostrom]
+network = "bostrom"
+min_signed_per_window = 75
+signed_blocks_window = 8000
+time_create_block = 5.5
+rpc = [ "https://rpc.bostrom.cybernode.ai:443",]
+path_bin = "/home/ubuntu/go/bin/cyber"
+time_repeat = 10
+missed_blocks = 90

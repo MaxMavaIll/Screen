@@ -49,8 +49,6 @@ async def terminal(cmd: str | list = None, password: str = "None"):
 
 
 async def get_validators(url: str, bin) -> list:
-    # config = toml.load("config.toml")
-    # bin = config["path_bin"]
 
     validators = await terminal(f"{bin} q staking validators --node {url} --limit 1000 -o json")
     output = validators[0].decode('utf-8')
@@ -105,9 +103,6 @@ async def get_index_by_moniker(moniker: str, validators: list) -> int:
 
 async def slashing_signing_info(key: str, url: str, bin: str):
 
-    # config = toml.load("config.toml")
-    # bin = config["path_bin"]
-
     p_variable = {
         "@type": "/cosmos.crypto.ed25519.PubKey",
         "key": key,
@@ -138,21 +133,16 @@ async def missed_block_counter(moniker):
 
     print(missed_block)
 
-# asyncio.run(missed_block_counter('ToTheMars'))
+
 
 
 async def get_index_by_consAddr(const_addr: str, signing_infos: list) -> int:
     for index, val in enumerate(signing_infos):
-        # current_moniker = val.get("description").get("moniker")
-        # logging.info(f"{index} - {current_moniker}. Seeking: {moniker}")
         if val.get("address") == const_addr:
             return index
 
 
 async def slashing_signing_info_all(url: str, bin: str) -> list:
-
-    # config = toml.load("config.toml")
-    # bin = config["path_bin"]
 
     cmd = [bin, 'q', 'slashing', 'signing-infos',
            '--limit', '1000', '--node', url, '-o', 'json']

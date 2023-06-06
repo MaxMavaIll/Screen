@@ -37,24 +37,15 @@ async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
 
     networks = list(data["validators"][type_network].keys())
     
-    if networks != {}:
-        await bot.edit_message_text("Please select a network",
-                                    chat_id=callback.from_user.id,
-                                    message_id=data['message_id'],
-                                    reply_markup=validator_moniker(
-                                        list(networks), 'networkL', 'list')
-                                    # reply_markup=list_validators(list(chains[network].keys()), 'chain'))
-                                    )
-    else:
-        await callback.answer(
-            'Sorry, but I didn\'t find any checker. \n'
-            'First, create a checker',
-            # show_alert=True
-        )
 
-        # data['type_network'] = ""
-        # data['network'] = ""
-        return
+    await bot.edit_message_text("Please select a network",
+                                chat_id=callback.from_user.id,
+                                message_id=data['message_id'],
+                                reply_markup=validator_moniker(
+                                    list(networks), 'networkL', 'list')
+                                # reply_markup=list_validators(list(chains[network].keys()), 'chain'))
+                                )
+
 
 
 

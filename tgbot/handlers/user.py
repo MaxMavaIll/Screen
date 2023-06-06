@@ -15,14 +15,11 @@ user_router = Router()
 
 @user_router.message(commands=["start"])
 async def user_start(message: Message, state: FSMContext, bot: Bot):
-    # await message.answer_sticker(sticker="sticker/cyberG.webp")
     data = await state.get_data()
 
     if data == {}:
         data = f.create_dict()
 
-    # if data['message_id'] != '':
-    #     await bot.delete_message(chat_id=message.chat.id, message_id=data["message_id"])
     
     logging.info(f"Message_id: {data['message_id']}")
     
@@ -50,8 +47,10 @@ async def Menu(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     data['type_network'] = ""
     data['network'] = ""
-    
+
     await callback.message.edit_text("<b>Menu</b>", reply_markup=menu())
-    
+    data["validators"] = dict(sorted(data["validators"].items()))
+
+
     await state.update_data(data)
     await state.set_state(None)

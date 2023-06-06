@@ -6,9 +6,6 @@ from aiogram.types import Message, CallbackQuery
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 
-
-# from api.config import nodes
-# from api.requests import MintScanner
 from tgbot.handlers.manage_checkers.router import checker_router
 from tgbot.misc.states import DeleteChecker
 from tgbot.keyboards.inline import *
@@ -16,8 +13,6 @@ from tgbot.keyboards.inline import *
 @checker_router.callback_query(text="delete")
 async def create_checker(callback: CallbackQuery, state: FSMContext):
     """Entry point for create checker conversation"""
-    # config = toml.load("config.toml")
-    # type_networks = list(config["networks"].keys())
     data = await state.get_data()
     type_networks = list(data["validators"].keys())
 
@@ -32,7 +27,6 @@ async def create_checker(callback: CallbackQuery, state: FSMContext):
 @checker_router.callback_query(Text(text_startswith="type_networkD&"))
 async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
 
-    # config = toml.load("config.toml")
     data = await state.get_data()
     type_network = callback.data.split("&")[-1].lower()
 
@@ -40,11 +34,9 @@ async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
         type_network = data["type_network"]
     else:
         await state.update_data(type_network=type_network)
-#    logging.info(f'Chains {chains.keys()} {n}')
 
     networks = list(data["validators"][type_network].keys())
 
-    # if networks != {}:
     await bot.edit_message_text("Please select a network",
                                 chat_id=callback.from_user.id,
                                 message_id=data['message_id'],
@@ -52,17 +44,6 @@ async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
                                     networks, 'networkD', 'delete')
                                 # reply_markup=list_validators(list(chains[network].keys()), 'chain'))
                                 )
-    # else:
-    #     await callback.answer(
-    #         'Sorry, but I didn\'t find any checker. \n'
-    #         'First, create a checker',
-    #         # show_alert=True
-    #     )
-
-    #     data['type_network'] = ""
-    #     data['network'] = ""
-    #     return
-
 
 
 @checker_router.callback_query(Text(text_startswith="networkD&"))
@@ -82,16 +63,6 @@ async def create_checker(callback: CallbackQuery, state: FSMContext):
 
     validators_list = list(data["validators"][type_network][network].keys())
 
-    # if not validators_list:
-    #     await callback.answer(
-    #         'Sorry, but I didn\'t find any checker. \n'
-    #         'First, create a checker',
-    #         # show_alert=True
-    #     )
-
-    #     return
-
-
     await callback.message.edit_text(
             'Let\'s see...\n'
             'What\'s your validator\'s name?',
@@ -103,8 +74,6 @@ async def create_checker(callback: CallbackQuery, state: FSMContext):
 @checker_router.callback_query(Text(text_startswith="delete&"))
 async def enter_operator_address(callback: CallbackQuery, state: FSMContext):
     
-    # config = toml.load("config.toml")
-
     """Enter validator's name"""
 
     moniker = callback.data.split("&")[-1]

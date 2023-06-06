@@ -19,7 +19,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from tgbot.handlers.manage_checkers.router import checker_router
 from tgbot.misc.states import Status
 from tgbot.keyboards.inline import validator_moniker
-from tgbot.keyboards.inline import menu, inline_list, to_menu
+from tgbot.keyboards.inline import *
 
 import os
 from funtion import *
@@ -30,34 +30,68 @@ from funtion import *
     
 @checker_router.callback_query(text="status")
 async def create_checker(callback: CallbackQuery, state: FSMContext):
+    """Entry point for create checker conversation"""
+    # config = toml.load("config.toml")
+    # type_networks = list(config["networks"].keys())
+    data = await state.get_data()
+    type_networks = list(data["validators"].keys())
+
+    if type_networks != []:
+        await callback.message.edit_text("Please select a network",
+                                         reply_markup=inline_list(type_networks, 'type_network_status'))
+
+    else:
+        await callback.message.edit_text(f"<b>There are currently no Networks available</b>",
+                                         reply_markup=to_menu())
+
+
+@checker_router.callback_query(Text(text_startswith="type_network_status&"))
+async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
+
+    # config = toml.load("config.toml")
+    data = await state.get_data()
+    type_network = callback.data.split("&")[-1].lower()
+
+    if type_network == 'back':
+        type_network = data["type_network"]
+    else:
+        await state.update_data(type_network=type_network)
+#    logging.info(f'Chains {chains.keys()} {n}')
+
+    networks = list(data["validators"][type_network].keys())
+
+    # if networks != {}:
+    await bot.edit_message_text(
+                    "Please select a network",
+                    chat_id=callback.from_user.id,
+                    message_id=data['message_id'],
+                    reply_markup=list_back(networks, 'network_status', 'status')
+                    # reply_markup=list_validators(list(chains[network].keys()), 'chain'))
+                    )
+
+
+@checker_router.callback_query(Text(text_startswith="network_status&"))
+async def create_checker(callback: CallbackQuery, state: FSMContext):
     
 
     """Entry point for create checker conversation"""
 
     data = await state.get_data()
+    type_network = data["type_network"]
+    network = callback.data.split("&")[-1].lower()
     
 
-    validators = data.get('validators', {})
-    validators_list = list(validators.keys())
-
-    if not validators_list:
-        await callback.answer(
-            'Sorry, but I didn\'t find any checker. \n'
-            'First, create a checker',
-            # show_alert=True
-        )
-
-        return
+    validators_list = list(data["validators"][type_network][network].keys())
     
 
     
     await callback.message.edit_text(
             'Let\'s see...\n'
             "The status of which validator do you want to know?",
-            reply_markup=list_validators(validators_list, "status")
+            reply_markup=validator_moniker(validators_list, "status", "type_network_status&", "back")
         )
     
-    
+    await state.update_data(network=network)
 
 
 
@@ -68,11 +102,15 @@ async def enter_operator_address(callback: CallbackQuery, state: FSMContext):
 
 
     """Enter validator's name"""
+    data = await state.get_data()
+    type_network = data["type_network"]
+    network = data["network"]
     moniker = callback.data.split("&")[-1]
+
     logging.info(f"I display the status on the screen {callback.from_user.id}")
 
     data = await state.get_data()
-    urls = await check_url()
+    urls = await check_url(config["networks"][type_network][network]["rpc"])
     active_rpc = urls["numer_active"]
     number_rpc = urls["urls"]
 
@@ -89,12 +127,12 @@ async def enter_operator_address(callback: CallbackQuery, state: FSMContext):
     
 
 
-    validators = await get_validators(url)
+    validators = await get_validators(url, config["networks"][type_network][network]["path_bin"])
     index = await get_index_by_moniker(moniker, validators)
 
     logging.info(f"Moniker: {moniker}. Index: {index}")
     validator = validators[await get_index_by_moniker(moniker, validators)]
-    signing_info = await slashing_signing_info(validator.get("consensus_pubkey").get("key"), url)
+    signing_info = await slashing_signing_info(validator.get("consensus_pubkey").get("key"), url, config["networks"][type_network][network]["path_bin"])
     missed_block = signing_info["missed_blocks_counter"]
 
 
