@@ -31,8 +31,6 @@ from funtion import *
 @checker_router.callback_query(text="status")
 async def create_checker(callback: CallbackQuery, state: FSMContext):
     """Entry point for create checker conversation"""
-    # config = toml.load("config.toml")
-    # type_networks = list(config["networks"].keys())
     data = await state.get_data()
     type_networks = list(data["validators"].keys())
 
@@ -48,7 +46,6 @@ async def create_checker(callback: CallbackQuery, state: FSMContext):
 @checker_router.callback_query(Text(text_startswith="type_network_status&"))
 async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
 
-    # config = toml.load("config.toml")
     data = await state.get_data()
     type_network = callback.data.split("&")[-1].lower()
 
@@ -56,17 +53,14 @@ async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
         type_network = data["type_network"]
     else:
         await state.update_data(type_network=type_network)
-#    logging.info(f'Chains {chains.keys()} {n}')
 
     networks = list(data["validators"][type_network].keys())
 
-    # if networks != {}:
     await bot.edit_message_text(
                     "Please select a network",
                     chat_id=callback.from_user.id,
                     message_id=data['message_id'],
                     reply_markup=list_back(networks, 'network_status', 'status')
-                    # reply_markup=list_validators(list(chains[network].keys()), 'chain'))
                     )
 
 
@@ -122,7 +116,6 @@ async def enter_operator_address(callback: CallbackQuery, state: FSMContext):
         return
 
     url = urls["active_urls"][0]
-    # url = data["rpc"]["active_urls"][0]
 
     
 

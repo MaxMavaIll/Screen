@@ -25,7 +25,6 @@ async def create_checker(callback: CallbackQuery, state: FSMContext):
 @checker_router.callback_query(Text(text_startswith="type_networkL&"))
 async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
 
-    # config = toml.load("config.toml")
     type_network = callback.data.split("&")[-1].lower()
     data = await state.get_data()
 
@@ -33,7 +32,6 @@ async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
         type_network = data["type_network"]
     else:
         await state.update_data(type_network=type_network)
-#    logging.info(f'Chains {chains.keys()} {n}')
 
     networks = list(data["validators"][type_network].keys())
     
@@ -53,7 +51,6 @@ async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
 async def list_my_validators(callback: CallbackQuery, state: FSMContext):
     """List all registered validators"""
 
-    # config = toml.load("config.toml")
     logging.info(f"I display the list on the screen {callback.from_user.id}")
 
     data = await state.get_data()

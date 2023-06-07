@@ -89,11 +89,12 @@ def check_number_missed_blocks(first_result: int, second_result: int, allow_miss
     return False
 
 
-async def send_message_user(bot: Bot, 
+async def send_message_user(
+                            bot: Bot, 
                             chat_id: int, 
                             moniker: str, 
                             missed_blocks: int, 
-                            
+                            network: str
                             ):
     config = toml.load("config.toml")
 
@@ -108,13 +109,17 @@ async def send_message_user(bot: Bot,
 
 
     if missed_blocks > (skipped_blocks_allowed * 0.7):
-        await bot.send_message(chat_id, f"<b>Moniker: {moniker}.</b>"
+        await bot.send_message(chat_id, 
+                            f"<b>Network: {network}</b>"
+                            f"\nMoniker: <b>{moniker}. </b>"
                             f"\n<b>I've just found {missed_blocks} missed blocks out of {skipped_blocks_allowed} total.</b>"
                             f"\n<b>You have ~{time_to_jail} hours before jailing.</b>"
                             f"\n <b>If you don't fix it, your validator will go to jail.</b>")
 
     else:
-        await bot.send_message(chat_id, f"<b>Moniker: {moniker}.</b>"
+        await bot.send_message(chat_id, 
+                            f"<b>Network: {network}</b>"
+                            f"\n<b>Moniker: {moniker}.</b>"
                             f"\nI've just found {missed_blocks} missed blocks out of {skipped_blocks_allowed} total."
                             f"\nYou have ~{ time_to_jail } hours before jailing.")
         

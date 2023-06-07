@@ -30,7 +30,7 @@ async def create_checker(callback: CallbackQuery, state: FSMContext):
 
     if type_networks != []:
         await callback.message.edit_text("Please select a network",
-                                         reply_markup=inline_list((type_networks), 'type_network'))
+                                         reply_markup=inline_list(type_networks, 'type_network'))
 
     else:
         await callback.message.edit_text(f"<b>There are currently no Networks available</b>",
@@ -47,7 +47,6 @@ async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
         type_network = data["type_network"]
     else:
         await state.update_data(type_network=type_network)
-#    logging.info(f'Chains {chains.keys()} {n}')
 
     if config["networks"][type_network] != {}:
         await bot.edit_message_text("Please select a network",
@@ -131,6 +130,12 @@ async def enter_operator_address(message: Message, state: FSMContext,
 
     logging.info(f"I create new validator/validators")
 
+    if type_network not in data['validators']:
+                data['validators'][type_network] = {}
+            
+    if network not in data['validators'][type_network]:
+        data['validators'][type_network][network] = {}
+
     for get_moniker in moniker_list:
 
         logging.info(f"")
@@ -161,13 +166,20 @@ async def enter_operator_address(message: Message, state: FSMContext,
 
             list_validators += '\n' + get_moniker + " - not found ❌"
             logging.info(f"I didn`t find moniker: {get_moniker}")
+            await bot.edit_message_text(
+                        f'Nice! Now I\'ll be checking this validator all day : {list_validators}', chat_id=message.from_user.id,
+                        message_id=message_id,
+                        reply_markup=to_menu(
+                            back=True, text='Try again', back_to='network&back')
+                    )
+            continue
 
-        elif get_moniker in data['validators'].keys():
+        elif get_moniker in data['validators'][type_network][network].keys():
 
             list_validators += '\n' + get_moniker + " - added"
 
-        elif get_moniker != moniker_list[len(moniker_list)-1]:
-            list_validators += '\n' + get_moniker + " - success 👌"
+        # elif get_moniker != moniker_list[len(moniker_list)-1]:
+        #     list_validators += '\n' + get_moniker + " - success 👌"
 
         else:
             list_validators += '\n' + get_moniker + " - success 👌"
@@ -179,33 +191,33 @@ async def enter_operator_address(message: Message, state: FSMContext,
                 back=True, text='Try again', back_to='network&back')
         )
 
-        if index is not None:
-            logging.info(f"I finding moniker: {get_moniker}")
-            validator = validators[index]
-            signing_info = await fun.slashing_signing_info(validator.get("consensus_pubkey").get("key"), url, config["networks"][type_network][network]["path_bin"])
-            missed_block = int(signing_info.get("missed_blocks_counter"))
+        
+        logging.info(f"I finding moniker: {get_moniker}")
+        validator = validators[index]
+        signing_info = await fun.slashing_signing_info(validator.get("consensus_pubkey").get("key"), url, config["networks"][type_network][network]["path_bin"])
+        missed_block = int(signing_info.get("missed_blocks_counter"))
 
-            data.setdefault('validators', {})
+        data.setdefault('validators', {})
 
-            if type_network not in data['validators']:
-                data['validators'][type_network] = {}
-            
-            if network not in data['validators'][type_network]:
-                data['validators'][type_network][network] = {}
-            
-            if get_moniker not in data['validators'][type_network]:
-                data['validators'][type_network][network][get_moniker] = {"const_addr": None, "last_missed_block": 0}
 
-            data["rpc"] = urls
-            data["validators"][type_network][network][get_moniker]["last_missed_block"] = missed_block
-            data["validators"][type_network][network][get_moniker]["const_addr"] = signing_info["address"]
+        if get_moniker not in data['validators'][type_network]:
+            data['validators'][type_network][network][get_moniker] = {"const_addr": None, "last_missed_block": 0}
 
-            logging.info(
-                f"I created moniker {message.from_user.id}: {get_moniker} success ✅\n")
-            logging.debug(f'Data: {data}')
+        data["rpc"] = urls
+        data["validators"][type_network][network][get_moniker]["last_missed_block"] = missed_block
+        data["validators"][type_network][network][get_moniker]["const_addr"] = signing_info["address"]
+
+        logging.info(
+            f"I created moniker {message.from_user.id}: {get_moniker} success ✅\n")
+        logging.debug(f'Data: {data}')
 
         # await storage.redis.set('checkers', json.dumps(checkers))
 
+    if data["validators"][type_network][network] == {}:
+                del data["validators"][type_network][network]
+
+    if data["validators"][type_network] == {}:
+        del data["validators"][type_network]
 
     await state.update_data(data)
     await state.set_state(None)

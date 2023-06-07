@@ -70,9 +70,6 @@ async def check_user_node(
                 for moniker in data["validators"][type_network][network].keys():
                     logging.info(f"Moniker: {moniker}")
 
-                    # validators = await get_validators(url)
-                    # validator = validators[await get_index_by_moniker(moniker, validators)]
-                    # signing_info = await slashing_signing_info(validator.get("consensus_pubkey").get("key"), url)
                     signing_infos = await slashing_signing_info_all(url, config_toml["networks"][type_network][network]["path_bin"])
                     signing_info = signing_infos[await get_index_by_consAddr(data["validators"][type_network][network][moniker]["const_addr"], signing_infos)]
 

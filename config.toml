@@ -39,3 +39,5 @@ rpc = [ "https://rpc.bostrom.cybernode.ai:443",]
 path_bin = "/home/ubuntu/go/bin/cyber"
 time_repeat = 10
 missed_blocks = 90
+
+

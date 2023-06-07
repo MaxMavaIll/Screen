@@ -71,9 +71,10 @@ async def check_url(urls: list) -> dict:
     for url in urls:
         try:
 
-            response = requests.get(url)
+            response = requests.get(url+"/status")
+            status = response.json()
 
-            if response.status_code == 200:
+            if response.status_code == 200 and not status["result"]["sync_info"]["catching_up"]:
                 data["active_urls"].append(url)
                 data["numer_active"] += 1
                 logging.info(f"Url is active {url}")

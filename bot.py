@@ -41,7 +41,6 @@ async def main():
     logger.info("Starting bot")
     config = load_config(".env")
     config_toml = toml.load("config.toml")
-    # time_repeat = config_toml["time_repeat"]
 
     storage = RedisStorage.from_url(config.redis_config.dsn(), key_builder=DefaultKeyBuilder(with_bot_id=True))
 
@@ -52,18 +51,6 @@ async def main():
 
     storage = dp.storage
     
-
-    # redis_url = await storage.update_data(bot, data="Mavron")
-    # logging.info(f"DISPECHER: {storage}")
-    # if isinstance(storage, RedisStorage):
-    #     # Отримання URL Redis з об'єкта RedisStorage
-
-    #     # Розбиваємо URL Redis для отримання номера бази даних
-    #     db_index = int(redis_url.split('/')[-1])
-    #     print(f"Dispatcher підключений до бази даних з індексом: {db_index}")
-    # else:
-    #     print("Dispatcher не підключений до RedisStorage")
-    # time.sleep(100)
     scheduler = setup_scheduler(bot = bot, config = config, storage = storage)
     
     for router in [
