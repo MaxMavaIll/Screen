@@ -40,7 +40,7 @@ async def check_user_node(
             logging.info(id)
             await bot.send_message(
             chat_id=id,
-            text=f'RPC not working 🔴, network {network} SCREENVALIDATOR',
+            text=f'RPC not working 🔴, network {network} <b>ScreenValidator</b>',
             )
 
         return 
