@@ -73,7 +73,7 @@ async def main():
         for network in config_toml["networks"][type_network].keys():
                 scheduler.add_job(
                         check_user_node,
-                        CronTrigger(minute="*/1"),
+                        IntervalTrigger(minutes=config_toml["networks"][type_network][network]["time_repeat"]),
                         kwargs={
                             'storage': storage,
                             'type_network': type_network,
@@ -81,7 +81,7 @@ async def main():
                         },
                         next_run_time=datetime.now(),
                         replace_existing=True,
-                        misfire_grace_time=600
+                        # misfire_grace_time=600
                     )
                 time.sleep(3)
 
