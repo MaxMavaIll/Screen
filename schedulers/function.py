@@ -77,7 +77,7 @@ def get_keys_redis(config: Config ) -> list:
 
     return keys
 
-def check_number_missed_blocks(first_result: int, second_result: int, allow_missed_block: int, network: str, type_network: str):
+async def check_number_missed_blocks(first_result: int, second_result: int, allow_missed_block: int, network: str, type_network: str):
     rizn = second_result - first_result
 
     logging.info(f"{network} {type_network} -> The number of missed blocks for 10 min:  {rizn}\n")

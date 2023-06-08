@@ -36,7 +36,9 @@ async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
     networks = list(data["validators"][type_network].keys())
     
 
-    await bot.edit_message_text("Please select a network",
+    await bot.edit_message_text(
+                                f"<b>{type_network.title()}</b>\n"
+                                "Please select a network",
                                 chat_id=callback.from_user.id,
                                 message_id=data['message_id'],
                                 reply_markup=validator_moniker(
@@ -69,14 +71,14 @@ async def list_my_validators(callback: CallbackQuery, state: FSMContext):
 
         return
 
-    validators_str = 'I\'m checking the following validators:\n\n'
+    validators_str = f'<b>{type_network.title()} -> {network.title()}</b>\nI\'m checking the following validators:\n\n'
     validators_str = validators_str + '\n'.join([
         f'{num}. {validator}\n'
         for num, validator in enumerate(list(validators[type_network][network].keys()), 1)
     ]
     )
     await callback.message.edit_text(validators_str,
-                                        reply_markup=to_menu(True, "Try another platform", "type_networkL&back"))
+                                     reply_markup=to_menu(True, "Try another platform", "type_networkL&back"))
     
     logging.info(f"I displayed the list on the screen {callback.from_user.id}: success ✅\n")
 

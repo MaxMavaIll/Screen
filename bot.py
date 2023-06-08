@@ -18,7 +18,8 @@ from tgbot.services import broadcaster
 
 
 from apscheduler.triggers.interval import IntervalTrigger
-from datetime import datetime
+from apscheduler.triggers.cron import CronTrigger
+from datetime import datetime, timedelta
 
 
 logger = logging.getLogger(__name__)
@@ -72,15 +73,17 @@ async def main():
         for network in config_toml["networks"][type_network].keys():
                 scheduler.add_job(
                         check_user_node,
-                        IntervalTrigger(minutes=config_toml["networks"][type_network][network]["time_repeat"]),
+                        CronTrigger(minute="*/1"),
                         kwargs={
                             'storage': storage,
                             'type_network': type_network,
                             'network': network
                         },
                         next_run_time=datetime.now(),
-                        replace_existing=True
+                        replace_existing=True,
+                        misfire_grace_time=600
                     )
+                time.sleep(3)
 
     scheduler.start()
     await dp.start_polling(bot)

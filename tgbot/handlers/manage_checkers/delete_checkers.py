@@ -37,7 +37,9 @@ async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
 
     networks = list(data["validators"][type_network].keys())
 
-    await bot.edit_message_text("Please select a network",
+    await bot.edit_message_text(
+                                f"<b>{type_network.title()}</b>\n"
+                                "Please select a network",
                                 chat_id=callback.from_user.id,
                                 message_id=data['message_id'],
                                 reply_markup=list_back(
@@ -64,6 +66,7 @@ async def create_checker(callback: CallbackQuery, state: FSMContext):
     validators_list = list(data["validators"][type_network][network].keys())
 
     await callback.message.edit_text(
+            f"<b>{type_network.title()} -> {network.title()}</b>\n"
             'Let\'s see...\n'
             'What\'s your validator\'s name?',
             reply_markup=validator_moniker(list(validators_list), 'delete', 'type_networkD&', 'back')
@@ -98,6 +101,7 @@ async def enter_operator_address(callback: CallbackQuery, state: FSMContext):
     
  
     await callback.message.edit_text(
+        f'<b>{type_network.title()} -> {network.title()}</b>\n'
         f'Okay, I deleted this checker : {moniker}',
         reply_markup=to_menu(True, "Try again", back_to="networkD&back")
     )

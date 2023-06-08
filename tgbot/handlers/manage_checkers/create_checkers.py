@@ -49,7 +49,9 @@ async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
         await state.update_data(type_network=type_network)
 
     if config["networks"][type_network] != {}:
-        await bot.edit_message_text("Please select a network",
+        await bot.edit_message_text(
+                                    f"<b>{type_network}</b>\n"
+                                    "Please select a network",
                                     chat_id=callback.from_user.id,
                                     message_id=data['message_id'],
                                     reply_markup=list_back(
@@ -71,6 +73,7 @@ async def create_checker(callback: CallbackQuery, state: FSMContext):
     """Entry point for create checker conversation"""
     config = toml.load("config.toml")
     data = await state.get_data()
+    type_network = data['type_network']
     network = callback.data.split("&")[-1].lower()
 
     if network == 'back':
@@ -79,6 +82,7 @@ async def create_checker(callback: CallbackQuery, state: FSMContext):
         await state.update_data(network=network)
 
     await callback.message.edit_text(
+        f"<b>{type_network.title()} -> {network.title()}</b>\n"
         'Let\'s see...\n'
         "What's your validator name?\n"
         "<b>Example</b>: web34ever or web34ever,cyberG,Mavpa...",
@@ -167,6 +171,7 @@ async def enter_operator_address(message: Message, state: FSMContext,
             list_validators += '\n' + get_moniker + " - not found ❌"
             logging.info(f"I didn`t find moniker: {get_moniker}")
             await bot.edit_message_text(
+                        f"<b>{type_network.title()} -> {network.title()}</b>\n"
                         f'Nice! Now I\'ll be checking this validator all day : {list_validators}', chat_id=message.from_user.id,
                         message_id=message_id,
                         reply_markup=to_menu(
@@ -185,6 +190,7 @@ async def enter_operator_address(message: Message, state: FSMContext,
             list_validators += '\n' + get_moniker + " - success 👌"
 
         await bot.edit_message_text(
+            f"<b>{type_network.title()} -> {network.title()}</b>\n"
             f'Nice! Now I\'ll be checking this validator all day : {list_validators}', chat_id=message.from_user.id,
             message_id=message_id,
             reply_markup=to_menu(

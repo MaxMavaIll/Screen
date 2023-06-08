@@ -57,6 +57,7 @@ async def change_chain(callback: CallbackQuery, state: FSMContext, bot: Bot):
     networks = list(data["validators"][type_network].keys())
 
     await bot.edit_message_text(
+                    f"<b>{type_network.title()}</b>\n"
                     "Please select a network",
                     chat_id=callback.from_user.id,
                     message_id=data['message_id'],
@@ -80,6 +81,7 @@ async def create_checker(callback: CallbackQuery, state: FSMContext):
 
     
     await callback.message.edit_text(
+            f"<b>{type_network.title()} -> {network.title()}</b>\n"
             'Let\'s see...\n'
             "The status of which validator do you want to know?",
             reply_markup=validator_moniker(validators_list, "status", "type_network_status&", "back")
@@ -135,7 +137,8 @@ async def enter_operator_address(callback: CallbackQuery, state: FSMContext):
 
 
     await callback.answer(
-        f'status: '
+        f"{type_network.title()} -> {network.title()} -> {moniker}"
+        f'\nstatus: '
         f'\n    moniker: {moniker}'
         f'\n    voting power: {validator["tokens"]}'
         f'\n    jailed:  {jail}'

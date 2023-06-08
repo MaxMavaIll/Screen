@@ -78,7 +78,7 @@ async def check_user_node(
                     first_snapshot_missed_block = data["validators"][type_network][network][moniker]["last_missed_block"]
                     second_snapshot_missed_block = int(signing_info.get("missed_blocks_counter"))
 
-                    if check_number_missed_blocks(
+                    if await check_number_missed_blocks(
                         first_snapshot_missed_block, 
                         second_snapshot_missed_block, 
                         allow_missed_block, 
