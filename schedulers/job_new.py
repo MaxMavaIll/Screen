@@ -28,12 +28,11 @@ async def check_user_node(
     config_toml = toml.load("config.toml")
     
 
-   
+    
     time_repeat = config_toml["networks"][type_network][network]["time_repeat"]
     allow_missed_block = config_toml["networks"][type_network][network]["missed_blocks"]
     urls = await check_url(config_toml["networks"][type_network][network]["rpc"])
-
-    logging.info(f"type_network: {type_network} | network: {network}")
+    
     if urls["active_urls"] == []:
 
         for id in config.tg_bot.admin_ids:
@@ -49,6 +48,8 @@ async def check_user_node(
 
     keys = get_keys_redis(config)
 
+    logging.info(f"\n\nNEW NETWORK {type_network} -> {network}\n")    
+    logging.info(f"Number of clients: {len(keys)}\n")         
 
     for key in keys:
         key = key.split(":")
@@ -57,18 +58,19 @@ async def check_user_node(
         chat_id = int(key[2])
         user_id = int(key[3])
         
-        logging.info(f"User: id - {user_id}")
 
         data = await storage.get_data(bot, StorageKey(bot_id=bot_id, chat_id=chat_id, user_id=user_id))
 
         if type_network in data["validators"]:
             
+
             if network in data["validators"][type_network]:
                 list_users = list(data["validators"][type_network][network].keys())
-                logging.info(f"Users: {len(list_users)}")
+                logging.info(f"{network} {type_network} -> User: id - {user_id}")
+                logging.info(f"{network} {type_network} -> Monikers: {len(list_users)}\n")
 
                 for moniker in data["validators"][type_network][network].keys():
-                    logging.info(f"Moniker: {moniker}")
+                    logging.info(f"{network} {type_network} -> Moniker: {moniker}")
 
                     signing_infos = await slashing_signing_info_all(url, config_toml["networks"][type_network][network]["path_bin"])
                     signing_info = signing_infos[await get_index_by_consAddr(data["validators"][type_network][network][moniker]["const_addr"], signing_infos)]
@@ -76,9 +78,23 @@ async def check_user_node(
                     first_snapshot_missed_block = data["validators"][type_network][network][moniker]["last_missed_block"]
                     second_snapshot_missed_block = int(signing_info.get("missed_blocks_counter"))
 
-                    if check_number_missed_blocks(first_snapshot_missed_block, second_snapshot_missed_block, allow_missed_block):
+                    if check_number_missed_blocks(
+                        first_snapshot_missed_block, 
+                        second_snapshot_missed_block, 
+                        allow_missed_block, 
+                        network, 
+                        type_network
+                        ):
 
-                        await send_message_user(bot=bot, chat_id=chat_id, moniker=moniker, missed_blocks=second_snapshot_missed_block)
+                        await send_message_user(
+                            bot=bot, 
+                            chat_id=chat_id, 
+                            moniker=moniker, 
+                            missed_blocks=second_snapshot_missed_block, 
+                            network=network, 
+                            type_network=type_network,
+                            config=config_toml["networks"][type_network][network]
+                            )
 
                     data["validators"][type_network][network][moniker]["last_missed_block"] = second_snapshot_missed_block
 
@@ -88,5 +104,5 @@ async def check_user_node(
 
 
         await storage.update_data(bot, StorageKey(bot_id=bot_id, chat_id=chat_id, user_id=user_id), data)
-        logging.debug(f"Data sheduler: {data}")
+        logging.debug(f"{network} {type_network} -> Data sheduler: {data}")
 

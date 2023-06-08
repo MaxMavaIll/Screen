@@ -66,24 +66,24 @@ def get_keys_redis(config: Config ) -> list:
 
     keys_list = r.keys('*')
 
-    logging.debug(keys_list)
+    logging.debug(f"Redis_keys: {keys_list}")
 
     for key in keys_list:
         if "data" in key.decode("utf-8"):
             keys.append(key.decode("utf-8"))
 
-    logging.info(f"Number of clients: {len(keys)}\n")
+    # logging.info(f"Number of clients: {len(keys)}\n")
 
 
     return keys
 
-def check_number_missed_blocks(first_result: int, second_result: int, allow_missed_block: int):
+def check_number_missed_blocks(first_result: int, second_result: int, allow_missed_block: int, network: str, type_network: str):
     rizn = second_result - first_result
 
-    logging.info(f"The number of missed blocks for 10 min:  {rizn}\n")
+    logging.info(f"{network} {type_network} -> The number of missed blocks for 10 min:  {rizn}\n")
 
     if rizn >= allow_missed_block:
-        logging.info(f"More than allowed {allow_missed_block}\n")
+        logging.info(f"{network} {type_network} -> More than allowed {allow_missed_block}\n")
         return True
     
     return False
@@ -94,9 +94,11 @@ async def send_message_user(
                             chat_id: int, 
                             moniker: str, 
                             missed_blocks: int, 
-                            network: str
+                            network: str,
+                            type_network: str,
+                            config: dict
                             ):
-    config = toml.load("config.toml")
+    # config = toml.load("config.toml")
 
     skipped_blocks_allowed = config["signed_blocks_window"] * (1 - config["min_signed_per_window"] / 100)
 
@@ -110,7 +112,7 @@ async def send_message_user(
 
     if missed_blocks > (skipped_blocks_allowed * 0.7):
         await bot.send_message(chat_id, 
-                            f"<b>Network: {network}</b>"
+                            f"<b>Network: {type_network.title()} {network.title()} </b>"
                             f"\nMoniker: <b>{moniker}. </b>"
                             f"\n<b>I've just found {missed_blocks} missed blocks out of {skipped_blocks_allowed} total.</b>"
                             f"\n<b>You have ~{time_to_jail} hours before jailing.</b>"
@@ -118,9 +120,9 @@ async def send_message_user(
 
     else:
         await bot.send_message(chat_id, 
-                            f"<b>Network: {network}</b>"
+                            f"<b>Network: {type_network.title()} {network.title()}</b>"
                             f"\n<b>Moniker: {moniker}.</b>"
                             f"\nI've just found {missed_blocks} missed blocks out of {skipped_blocks_allowed} total."
                             f"\nYou have ~{ time_to_jail } hours before jailing.")
         
-    logging.info(f"I sent message to {chat_id}")
+    logging.info(f"{network} {type_network} -> I sent message to {chat_id}")

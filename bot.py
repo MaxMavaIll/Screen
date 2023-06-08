@@ -81,9 +81,6 @@ async def main():
                         next_run_time=datetime.now(),
                         replace_existing=True
                     )
-    jobs = scheduler.get_jobs()
-    job_count = len(jobs)
-    logging.info(f"JOBS LEN {job_count}")
 
     scheduler.start()
     await dp.start_polling(bot)
